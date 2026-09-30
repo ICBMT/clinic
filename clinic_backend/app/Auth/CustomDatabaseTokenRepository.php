@@ -16,14 +16,19 @@ class CustomDatabaseTokenRepository extends BaseDatabaseTokenRepository
      */
     protected function getPayload($email, #[\SensitiveParameter] $token)
     {
-        // Generate a unique ID for the token
-        $id = uniqid('email_', true);
-        
+        // password_reset_tokens is shared with the mobile OTP flow
+        // (App\Models\PasswordResetToken) and uses a string primary key that
+        // the stock repository never fills. Same id format as createForEmail(),
+        // and expires_at mirrors the broker's own expiry ($this->expires is in
+        // seconds) so the model's valid()/cleanupExpired() see both kinds of row.
+        $now = new Carbon;
+
         return [
-            'id' => $id,
+            'id' => uniqid('email_', true),
             'email' => $email,
             'token' => $this->hasher->make($token),
-            'created_at' => new Carbon,
+            'created_at' => $now,
+            'expires_at' => $now->copy()->addSeconds($this->expires),
         ];
     }
 }

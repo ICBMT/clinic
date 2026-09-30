@@ -22,14 +22,20 @@ class CustomPasswordBrokerManager extends BasePasswordBrokerManager
             $key = base64_decode(substr($key, 7));
         }
 
-        $connection = $config['connection'] ?? null;
+        // Mirrors the parent implementation: the cache driver has no schema to
+        // satisfy, so only the database repository is swapped for our own.
+        if (isset($config['driver']) && $config['driver'] === 'cache') {
+            return parent::createTokenRepository($config);
+        }
 
+        // The repository expects `expires` in SECONDS; config `expire` is in
+        // minutes (same conversion the parent applies).
         return new CustomDatabaseTokenRepository(
-            $this->app['db']->connection($connection),
+            $this->app['db']->connection($config['connection'] ?? null),
             $this->app['hash'],
             $config['table'],
             $key,
-            $config['expire'],
+            ($config['expire'] ?? 60) * 60,
             $config['throttle'] ?? 0
         );
     }
