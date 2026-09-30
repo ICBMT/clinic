@@ -39,7 +39,8 @@ class UserProfileTest extends TestCase
         // Create test user
         $this->user = User::factory()->create([
             'phone' => '+96550123456',
-            'email' => 'testuser' . uniqid() . '@example.com',
+            // gmail.com: UpdateProfile validates with email:rfc,dns and example.com has a null MX
+            'email' => 'testuser' . uniqid() . '@gmail.com',
             'password' => Hash::make('password123'),
             'status' => 'active',
         ]);
@@ -64,7 +65,7 @@ class UserProfileTest extends TestCase
     public function test_get_user_profile(): void
     {
         $response = $this->withHeader('Authorization', "Bearer {$this->token}")
-            ->getJson("{$this->baseUrl}/user/profile");
+            ->getJson("{$this->baseUrl}/auth/me");
 
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -89,7 +90,7 @@ class UserProfileTest extends TestCase
     public function test_update_user_profile(): void
     {
         $newName = 'Updated Name';
-        $newEmail = 'updated' . uniqid() . '@example.com';
+        $newEmail = 'updated' . uniqid() . '@gmail.com';
 
         $response = $this->withHeader('Authorization', "Bearer {$this->token}")
             ->putJson("{$this->baseUrl}/user/profile", [
@@ -150,7 +151,7 @@ class UserProfileTest extends TestCase
         $userId = $this->user->id;
 
         $response = $this->withHeader('Authorization', "Bearer {$this->token}")
-            ->deleteJson("{$this->baseUrl}/user/account", [
+            ->deleteJson("{$this->baseUrl}/auth/delete-account", [
                 'password' => 'password123',
             ]);
 
