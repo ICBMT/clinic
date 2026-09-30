@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ContactFormRequest;
 use App\Contracts\SupportRepositoryInterface;
+use App\Services\LandingService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -19,9 +20,11 @@ class HomeController extends Controller
     /**
      * Show welcome page
      */
-    public function welcome(): Response
+    public function welcome(LandingService $landingService): Response
     {
-        return Inertia::render('welcome');
+        return Inertia::render('welcome', [
+            'landing' => $landingService->build(),
+        ]);
     }
 
     /**

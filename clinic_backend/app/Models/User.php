@@ -362,6 +362,24 @@ class User extends Authenticatable
         return $this->hasMany(Address::class);
     }
 
+    /**
+     * Get subscriptions across all clinics owned by this user.
+     *
+     * Kept under its legacy name because call sites (e.g.
+     * getCurrentSubscription()) predate the vendor -> clinic rename.
+     */
+    public function vendorSubscriptions(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            ClinicSubscription::class,
+            Clinic::class,
+            'owner_id',      // clinics.owner_id -> users.id
+            'clinic_id',     // clinic_subscriptions.clinic_id -> clinics.id
+            'id',
+            'id'
+        );
+    }
+
 
     // Vendor Scopes
     /**

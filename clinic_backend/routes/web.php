@@ -10,21 +10,28 @@ Route::match(['get', 'post'], '/payment/callback', [HomeController::class, 'paym
 Route::match(['get', 'post'], '/payment/error', [HomeController::class, 'paymentErrorCallback'])->name('payment.error');
 Route::post('/payment/webhook', [HomeController::class, 'paymentWebhook'])->name('payment.webhook');
 
-// Welcome/Home page
-Route::get('/', [HomeController::class, 'welcome'])->name('home');
+// Public marketing/content pages. These sit behind the database-driven
+// maintenance mode (maintenance_modes table); payment callbacks, language
+// switching, auth and dashboard routes are intentionally NOT gated so the
+// platform can keep processing payments and staff can keep working while
+// maintenance is enabled.
+Route::middleware('maintenance')->group(function () {
+    // Welcome/Home page
+    Route::get('/', [HomeController::class, 'welcome'])->name('home');
 
-// Coming Soon page
-Route::get('/coming-soon', [HomeController::class, 'comingSoon'])->name('coming-soon');
+    // Coming Soon page
+    Route::get('/coming-soon', [HomeController::class, 'comingSoon'])->name('coming-soon');
 
-// Terms & Conditions
-Route::get('/terms', [HomeController::class, 'terms'])->name('terms');
+    // Terms & Conditions
+    Route::get('/terms', [HomeController::class, 'terms'])->name('terms');
 
-// Privacy Policy
-Route::get('/privacy', [HomeController::class, 'privacy'])->name('privacy');
+    // Privacy Policy
+    Route::get('/privacy', [HomeController::class, 'privacy'])->name('privacy');
 
-// Contact Us
-Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
-Route::post('/contact', [HomeController::class, 'submitContact'])->name('contact.submit');
+    // Contact Us
+    Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
+    Route::post('/contact', [HomeController::class, 'submitContact'])->name('contact.submit');
+});
 
 // Language switching route
 Route::post('language/{locale}', [HomeController::class, 'switchLanguage'])->name('language.switch');
