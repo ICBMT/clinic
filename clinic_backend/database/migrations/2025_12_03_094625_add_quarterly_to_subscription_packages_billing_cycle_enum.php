@@ -13,8 +13,12 @@ return new class extends Migration
     public function up(): void
     {
         // Modify the ENUM column to include 'quarterly'
-        // MySQL requires using raw SQL to alter ENUM columns
-        DB::statement("ALTER TABLE `subscription_packages` MODIFY COLUMN `billing_cycle` ENUM('monthly', 'quarterly', 'yearly') DEFAULT 'monthly'");
+        // MySQL requires using raw SQL to alter ENUM columns.
+        // MySQL-only syntax (MODIFY COLUMN / ENUM): skipped on other drivers,
+        // e.g. the SQLite database used by the test suite.
+        if (config('database.default') === 'mysql') {
+            DB::statement("ALTER TABLE `subscription_packages` MODIFY COLUMN `billing_cycle` ENUM('monthly', 'quarterly', 'yearly') DEFAULT 'monthly'");
+        }
     }
 
     /**
@@ -23,6 +27,8 @@ return new class extends Migration
     public function down(): void
     {
         // Revert back to original ENUM values (monthly, yearly)
-        DB::statement("ALTER TABLE `subscription_packages` MODIFY COLUMN `billing_cycle` ENUM('monthly', 'yearly') DEFAULT 'monthly'");
+        if (config('database.default') === 'mysql') {
+            DB::statement("ALTER TABLE `subscription_packages` MODIFY COLUMN `billing_cycle` ENUM('monthly', 'yearly') DEFAULT 'monthly'");
+        }
     }
 };

@@ -10,8 +10,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Make name_ar nullable using raw SQL (Doctrine DBAL not required)
-        DB::statement("ALTER TABLE `subscription_packages` MODIFY COLUMN `name_ar` VARCHAR(255) NULL");
+        // Make name_ar nullable using raw SQL (Doctrine DBAL not required).
+        // MySQL-only syntax (MODIFY COLUMN): skipped on other drivers,
+        // e.g. the SQLite database used by the test suite.
+        if (config('database.default') === 'mysql') {
+            DB::statement("ALTER TABLE `subscription_packages` MODIFY COLUMN `name_ar` VARCHAR(255) NULL");
+        }
     }
 
     /**
@@ -21,7 +25,9 @@ return new class extends Migration
     {
         // Revert name_ar to NOT NULL
         // First, set any NULL values to empty string to avoid constraint violation
-        DB::statement("UPDATE `subscription_packages` SET `name_ar` = '' WHERE `name_ar` IS NULL");
-        DB::statement("ALTER TABLE `subscription_packages` MODIFY COLUMN `name_ar` VARCHAR(255) NOT NULL");
+        if (config('database.default') === 'mysql') {
+            DB::statement("UPDATE `subscription_packages` SET `name_ar` = '' WHERE `name_ar` IS NULL");
+            DB::statement("ALTER TABLE `subscription_packages` MODIFY COLUMN `name_ar` VARCHAR(255) NOT NULL");
+        }
     }
 };
