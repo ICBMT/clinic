@@ -20,7 +20,6 @@ class BookingFactory extends Factory
             'booking_reference' => 'BK' . fake()->unique()->numerify('########'),
             'user_id' => \App\Models\User::factory(),
             'vendor_id' => \App\Models\User::factory(),
-            'service_id' => \App\Models\Service::factory(),
             'booking_date' => now()->addDays(fake()->numberBetween(1, 30)),
             'start_time' => fake()->time('H:i'),
             'end_time' => fake()->time('H:i'),

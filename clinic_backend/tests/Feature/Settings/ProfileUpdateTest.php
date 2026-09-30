@@ -12,29 +12,29 @@ class ProfileUpdateTest extends TestCase
 
     public function test_profile_page_is_displayed()
     {
-        $user = User::factory()->create();
+        $user = $this->createUserWithProfileAccess();
 
         $response = $this
             ->actingAs($user)
-            ->get(route('profile.edit'));
+            ->get(route('dashboard.profile.edit'));
 
         $response->assertOk();
     }
 
     public function test_profile_information_can_be_updated()
     {
-        $user = User::factory()->create();
+        $user = $this->createUserWithProfileAccess();
 
         $response = $this
             ->actingAs($user)
-            ->patch(route('profile.update'), [
+            ->patch(route('dashboard.profile.update'), [
                 'name' => 'Test User',
                 'email' => 'test@example.com',
             ]);
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect(route('profile.edit'));
+            ->assertRedirect(route('dashboard.profile.edit'));
 
         $user->refresh();
 
@@ -45,29 +45,29 @@ class ProfileUpdateTest extends TestCase
 
     public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged()
     {
-        $user = User::factory()->create();
+        $user = $this->createUserWithProfileAccess();
 
         $response = $this
             ->actingAs($user)
-            ->patch(route('profile.update'), [
+            ->patch(route('dashboard.profile.update'), [
                 'name' => 'Test User',
                 'email' => $user->email,
             ]);
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect(route('profile.edit'));
+            ->assertRedirect(route('dashboard.profile.edit'));
 
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
 
     public function test_user_can_delete_their_account()
     {
-        $user = User::factory()->create();
+        $user = $this->createUserWithProfileAccess();
 
         $response = $this
             ->actingAs($user)
-            ->delete(route('profile.destroy'), [
+            ->delete(route('dashboard.profile.destroy'), [
                 'password' => 'password',
             ]);
 
@@ -76,24 +76,38 @@ class ProfileUpdateTest extends TestCase
             ->assertRedirect(route('home'));
 
         $this->assertGuest();
-        $this->assertNull($user->fresh());
+        // User soft-deletes, so fresh() still returns the row; assert on deleted_at instead.
+        $this->assertSoftDeleted($user);
     }
 
     public function test_correct_password_must_be_provided_to_delete_account()
     {
-        $user = User::factory()->create();
+        $user = $this->createUserWithProfileAccess();
 
         $response = $this
             ->actingAs($user)
-            ->from(route('profile.edit'))
-            ->delete(route('profile.destroy'), [
+            ->from(route('dashboard.profile.edit'))
+            ->delete(route('dashboard.profile.destroy'), [
                 'password' => 'wrong-password',
             ]);
 
         $response
             ->assertSessionHasErrors('password')
-            ->assertRedirect(route('profile.edit'));
+            ->assertRedirect(route('dashboard.profile.edit'));
 
         $this->assertNotNull($user->fresh());
+    }
+
+    /**
+     * Profile routes are permission-gated ('profile.edit' / 'profile.destroy');
+     * a role-less factory user gets 403. Grant only what these tests exercise
+     * (super-admin is not usable here: it may not delete its own account).
+     */
+    private function createUserWithProfileAccess(): User
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(['profile.edit', 'profile.destroy']);
+
+        return $user;
     }
 }

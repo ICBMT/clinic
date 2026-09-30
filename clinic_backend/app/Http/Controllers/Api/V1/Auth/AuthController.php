@@ -10,6 +10,7 @@ use App\Http\Requests\Api\V1\Auth\ResendOtpRequest;
 use App\Http\Requests\Api\V1\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Api\V1\Auth\ResetPasswordRequest;
 use App\Http\Requests\Api\V1\Auth\ChangePasswordRequest;
+use App\Http\Requests\Api\V1\User\DeleteAccountRequest;
 
 use App\Http\Resources\Api\V1\Auth\TokenResource;
 use App\Http\Resources\Api\V1\Auth\UserResource;
@@ -634,11 +635,23 @@ class AuthController extends Controller
     /**
      * Delete user account
      */
-    public function deleteAccount(Request $request): JsonResponse
+    public function deleteAccount(DeleteAccountRequest $request): JsonResponse
     {
         return $this->withTransaction(function () use ($request) {
             $user = $request->user();
             $deviceToken = $request->input('device_token');
+
+            // Re-authenticate before an irreversible action: the bearer token
+            // alone is not enough to delete the account (same check as changePassword).
+            if (!Hash::check($request->validated()['password'], $user->password)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('common.validation_failed'),
+                    'errors' => [
+                        'password' => [__('common.provided_password_incorrect')]
+                    ]
+                ], 422);
+            }
 
             // Handle device token deletion
             $this->handleDeviceToken('delete', $user, $deviceToken);

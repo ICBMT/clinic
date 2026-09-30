@@ -121,7 +121,6 @@ Route::middleware(['auth:sanctum', UserAccess::class])->group(function () {
         Route::get('{id}/treatments', [ClinicController::class, 'treatments']);
         Route::get('{id}/machines', [ClinicController::class, 'machines']);
         Route::get('{id}/reviews', [ReviewController::class, 'getClinicReviews']);
-        Route::get('{id}/reviews', [ClinicController::class, 'reviews']);
         Route::post('{id}/favorite', [ClinicController::class, 'toggleFavorite']);
         Route::get('{id}/share', [ClinicController::class, 'getShareLink']);
         Route::get('{id}/{machineId?}', [ClinicController::class, 'show']);

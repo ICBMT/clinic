@@ -49,7 +49,9 @@ class AuthFlowTest extends TestCase
 
         // Generate unique phone and email for testing
         $this->phone = '+9655' . rand(1000000, 9999999);
-        $this->email = 'test' . uniqid() . '@example.com';
+        // Register/UpdateProfile validate with email:rfc,dns; example.com publishes a null MX record
+        // ("accepts no mail"), so it is rejected. gmail.com resolves with real MX records.
+        $this->email = 'test' . uniqid() . '@gmail.com';
     }
 
     /**
@@ -527,8 +529,11 @@ class AuthFlowTest extends TestCase
         $token = $loginResponse->json('data.token.access_token');
 
         // Delete account
+        // Account deletion re-authenticates with the current password (DeleteAccountRequest)
         $deleteResponse = $this->withHeader('Authorization', "Bearer {$token}")
-            ->deleteJson("{$this->baseUrl}/delete-account");
+            ->deleteJson("{$this->baseUrl}/delete-account", [
+                'password' => 'password123',
+            ]);
 
         $deleteResponse->assertStatus(200)
             ->assertJsonStructure([

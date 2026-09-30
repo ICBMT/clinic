@@ -111,8 +111,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Override the password broker manager to use custom token repository
-        $this->app->singleton('auth.password', function ($app) {
+        // Override the password broker manager so the web reset flow writes the
+        // string `id` primary key that password_reset_tokens requires.
+        // This must be extend(), not singleton(): the framework's
+        // PasswordResetServiceProvider is deferred and re-binds 'auth.password'
+        // the first time it is resolved, which silently discarded a singleton()
+        // registered here and left the stock DatabaseTokenRepository in place.
+        $this->app->extend('auth.password', function ($manager, $app) {
             return new CustomPasswordBrokerManager($app);
         });
         // Register User Repository
