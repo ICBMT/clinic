@@ -39,8 +39,7 @@ class UserProfileTest extends TestCase
         // Create test user
         $this->user = User::factory()->create([
             'phone' => '+96550123456',
-            // gmail.com: UpdateProfile validates with email:rfc,dns and example.com has a null MX
-            'email' => 'testuser' . uniqid() . '@gmail.com',
+            'email' => 'testuser' . uniqid() . '@example.com',
             'password' => Hash::make('password123'),
             'status' => 'active',
         ]);
@@ -90,7 +89,7 @@ class UserProfileTest extends TestCase
     public function test_update_user_profile(): void
     {
         $newName = 'Updated Name';
-        $newEmail = 'updated' . uniqid() . '@gmail.com';
+        $newEmail = 'updated' . uniqid() . '@example.com';
 
         $response = $this->withHeader('Authorization', "Bearer {$this->token}")
             ->putJson("{$this->baseUrl}/user/profile", [
