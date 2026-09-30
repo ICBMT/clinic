@@ -77,7 +77,7 @@ class DashboardController extends Controller
         }
         
         // For other roles with dashboard.highlights permission (and not clinic roles), show platform-wide stats
-        if ($user->hasPermissionTo('dashboard.highlights') && !$user->hasRole(['clinic_manager', 'clinic'])) {
+        if ($user->checkPermissionTo('dashboard.highlights') && !$user->hasRole(['clinic_manager', 'clinic'])) {
             return $this->getAdminStats();
         }
         
@@ -329,7 +329,7 @@ class DashboardController extends Controller
         }
         
         // For other roles with dashboard.user-activity permission, show platform-wide charts
-        if ($user->hasPermissionTo('dashboard.user-activity')) {
+        if ($user->checkPermissionTo('dashboard.user-activity')) {
             return $this->getAdminCharts();
         }
         

@@ -49,9 +49,7 @@ class AuthFlowTest extends TestCase
 
         // Generate unique phone and email for testing
         $this->phone = '+9655' . rand(1000000, 9999999);
-        // Register/UpdateProfile validate with email:rfc,dns; example.com publishes a null MX record
-        // ("accepts no mail"), so it is rejected. gmail.com resolves with real MX records.
-        $this->email = 'test' . uniqid() . '@gmail.com';
+        $this->email = 'test' . uniqid() . '@example.com';
     }
 
     /**

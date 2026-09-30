@@ -18,7 +18,7 @@ class UpdateProfileRequest extends FormRequest
         
         return [
             'name' => ['sometimes', 'string', 'max:255'],
-            'email' => ['sometimes', 'string', 'lowercase', 'email:rfc,dns', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'email' => ['sometimes', 'string', 'lowercase', 'email:rfc', 'max:255', Rule::unique('users')->ignore($user->id)],
             'phone' => ['sometimes', 'string', 'max:255', Rule::unique('users')->ignore($user->id)],
             'default_language' => ['sometimes', 'string', 'in:en,ar'],
             'gender' => ['nullable', 'string', 'in:male,female,other'],
