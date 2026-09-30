@@ -15,6 +15,12 @@ export default defineConfig({
         tailwindcss(),
         wayfinder({
             formVariants: true,
+            // Some static PHP builds segfault at process exit AFTER generation
+            // completes successfully (exit 139 with all files written). Tolerate
+            // the non-zero exit here: a genuinely failed generation still breaks
+            // the build because the generated @/routes and @/actions modules
+            // would be missing.
+            command: "sh -c 'php artisan wayfinder:generate \"$@\" || true' wayfinder",
         }),
     ],
     esbuild: {

@@ -1,57 +1,67 @@
-import { useTranslation } from '@/hooks/use-translation';
+import { CtaSection } from '@/components/landing/cta-section';
+import { CategoriesGrid } from '@/components/landing/categories-grid';
+import { FaqSection } from '@/components/landing/faq-section';
+import { FeaturedClinics } from '@/components/landing/featured-clinics';
+import { Hero } from '@/components/landing/hero';
+import { HowItWorks } from '@/components/landing/how-it-works';
+import { LandingFooter } from '@/components/landing/landing-footer';
+import { LandingHeader } from '@/components/landing/landing-header';
+import { MachinesSection } from '@/components/landing/machines-section';
+import { ReviewsSection } from '@/components/landing/reviews-section';
+import { StatsBar } from '@/components/landing/stats-bar';
+import { TreatmentsGrid } from '@/components/landing/treatments-grid';
 import { useRTLInit } from '@/hooks/use-rtl-init';
-import { useRTL } from '@/hooks/use-rtl';
-import { type SharedData } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { useTranslation } from '@/hooks/use-translation';
 import FrontendLayout from '@/layouts/frontend-layout';
-import { cn } from '@/lib/utils';
+import { type SharedData } from '@/types';
+import { emptyLanding, type LandingData } from '@/types/landing';
+import { usePage } from '@inertiajs/react';
 
+interface WelcomeProps {
+    landing?: LandingData;
+}
+
+/**
+ * Public welcome/landing page.
+ *
+ * Fully dynamic: every section (stats, categories, clinics, treatments,
+ * machines, reviews, FAQs, hero banner) is assembled by
+ * App\Services\LandingService from live database content. Sections render
+ * nothing when they have no data, so the page degrades gracefully on a
+ * fresh installation.
+ */
 export default function Welcome() {
     useRTLInit();
-    const { t } = useTranslation();
-    const page = usePage<SharedData>();
-    const { locale: pageLocale } = page.props;
-    
-    // Force RTL detection from page props
-    const isRTL = pageLocale === 'ar';
-    const dir = isRTL ? 'rtl' : 'ltr';
-    const flexDirection = isRTL ? 'flex-row-reverse' : 'flex-row';
-    
-    const { iconMargin } = useRTL();
+    const { t, locale, isRTL } = useTranslation();
+    const { siteSettings } = usePage<SharedData>().props;
+    const page = usePage<SharedData & WelcomeProps>();
+
+    const landing: LandingData = { ...emptyLanding, ...(page.props.landing ?? {}) };
+
+    const appNameEn = siteSettings?.app_name_en || t('app_name');
+    const appNameAr = siteSettings?.app_name_ar || t('app_name');
+    const appName = isRTL ? appNameAr : appNameEn;
 
     return (
-        <>
-            <Head title={t('coming_soon')}>
-                <link rel="preconnect" href="https://fonts.bunny.net" />
-                <link
-                    href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600"
-                    rel="stylesheet"
-                />
-            </Head>
-            <FrontendLayout title={t('coming_soon')}>
-                <div className="flex-1 flex items-center justify-center p-6 pt-24 pb-32">
-                    <div className={cn("max-w-4xl mx-auto text-center")}>
-                        <div className={cn("mb-8 inline-flex items-center gap-2 rounded-full border border-primary/20 dark:border-primary/30 bg-white/80 dark:bg-slate-800/80 px-4 py-2 backdrop-blur-sm")}>
-                            <div className="h-2 w-2 animate-pulse rounded-full bg-green-500 dark:bg-green-400"></div>
-                            <span className="text-sm font-medium text-foreground">
-                                {t('coming_soon')}
-                            </span>
-                        </div>
+        <FrontendLayout title={t('landing_page_title')} showHeader={false} showFooter={false}>
+            <div className="flex min-h-screen flex-col" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+                <LandingHeader appName={appName} />
 
-                        <h1 className="mb-6 text-5xl leading-tight font-bold text-foreground md:text-6xl text-center">
-                            {t('something')}
-                            <span className="block text-white dark:text-slate-100">
-                                {t('amazing')}
-                            </span>
-                            <span className="block">{t('is_coming')}</span>
-                        </h1>
+                <main className="flex-1">
+                    <Hero stats={landing.stats} banner={landing.banner} />
+                    <StatsBar stats={landing.stats} />
+                    <CategoriesGrid categories={landing.categories} />
+                    <FeaturedClinics clinics={landing.featured_clinics} />
+                    <HowItWorks />
+                    <TreatmentsGrid treatments={landing.treatments} />
+                    <MachinesSection machines={landing.machines} />
+                    <ReviewsSection reviews={landing.reviews} />
+                    <FaqSection faqs={landing.faqs} />
+                    <CtaSection />
+                </main>
 
-                        <p className={cn("mx-auto mb-12 max-w-2xl text-lg leading-relaxed text-slate-100 dark:text-slate-200", isRTL ? "!text-right" : "!text-left")}>
-                            {t('coming_soon_subtitle')}
-                        </p>
-                    </div>
-                </div>
-            </FrontendLayout>
-        </>
+                <LandingFooter appName={appName} />
+            </div>
+        </FrontendLayout>
     );
 }

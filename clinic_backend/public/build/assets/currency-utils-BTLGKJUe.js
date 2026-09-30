@@ -1,0 +1,1 @@
+import{i as o,c as s}from"./app-5dcajGMf.js";function f(n,i="KWD"){const a=typeof n=="string"?parseFloat(n):n;let e;isNaN(a)||a===0?e="0.00":e=new Intl.NumberFormat("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}).format(a);const r=`currency_${i.toLowerCase()}`;let t=o()[r];return(!t||t===r)&&(t=s(r)),(!t||t===r||t.trim()==="")&&(t=i),`${e} ${t}`}export{f};
