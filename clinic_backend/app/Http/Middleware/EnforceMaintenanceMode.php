@@ -20,8 +20,11 @@ class EnforceMaintenanceMode
     {
         try {
             $mode = MaintenanceMode::query()->latest('id')->first();
-        } catch (\Exception $e) {
-            // If table doesn't exist (e.g., during tests), skip maintenance check
+        } catch (\Throwable $e) {
+            // Degrade gracefully (open) if the maintenance_modes table or the
+            // MaintenanceMode model is unavailable, e.g. during tests or before
+            // migrations have run. \Throwable is required because a missing class
+            // raises \Error, which \Exception does not catch.
             return $next($request);
         }
 
@@ -40,15 +43,18 @@ class EnforceMaintenanceMode
                 return response()->json([
                     'message' => $mode->title_en,
                     'title' => $mode->title_en,
-                    'details' => $mode->body_en,
+                    'details' => $mode->description_en,
                 ], 503);
             }
 
+            // Prop keys stay body_en/body_ar because resources/js/pages/maintenance.tsx
+            // and resources/views/errors/maintenance.blade.php read those names; the
+            // maintenance_modes table stores them as description_en/description_ar.
             $response = Inertia::render('maintenance', [
                 'title_en' => $mode->title_en,
                 'title_ar' => $mode->title_ar,
-                'body_en' => $mode->body_en,
-                'body_ar' => $mode->body_ar,
+                'body_en' => $mode->description_en,
+                'body_ar' => $mode->description_ar,
             ])->toResponse($request);
 
             return $response->setStatusCode(503);

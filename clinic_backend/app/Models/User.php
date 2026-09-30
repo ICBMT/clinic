@@ -274,22 +274,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the coupons for the vendor.
-     */
-    public function coupons()
-    {
-        return $this->hasMany(Coupon::class, 'vendor_id');
-    }
-
-    /**
-     * Get the vendor subscriptions for the user.
-     */
-    public function vendorSubscriptions()
-    {
-        return $this->hasMany(VendorSubscription::class, 'vendor_id');
-    }
-
-    /**
      * Get the vendor documents for the user.
      */
     // public function vendorDocuments()
@@ -323,38 +307,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the service packages for the user.
-     */
-    public function servicePackages()
-    {
-        return $this->hasMany(ServicePackage::class);
-    }
-
-    /**
-     * Get the loyalty points for the user.
-     */
-    public function loyaltyPoints()
-    {
-        return $this->hasMany(LoyaltyPoint::class);
-    }
-
-    /**
-     * Get the loyalty tracker for the user.
-     */
-    public function loyaltyTracker()
-    {
-        return $this->hasOne(LoyaltyTracker::class);
-    }
-
-    /**
-     * Get the coupon usages for the user.
-     */
-    public function couponUsages()
-    {
-        return $this->hasMany(CouponUsage::class);
-    }
-
-    /**
      * Get the transactions for the user.
      */
     public function userTransactions()
@@ -368,14 +320,6 @@ class User extends Authenticatable
     public function vendorTransactions()
     {
         return $this->hasMany(Transaction::class, 'vendor_id');
-    }
-
-    /**
-     * Get the booking cancellation policies for the vendor.
-     */
-    public function bookingCancellationPolicies()
-    {
-        return $this->hasMany(BookingCancellationPolicy::class, 'vendor_id');
     }
 
     /**
